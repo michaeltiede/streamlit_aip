@@ -44,7 +44,7 @@ jupyter_core==5.7.2
 MarkupSafe==2.1.5
 matplotlib-inline==0.1.7
 nest-asyncio==1.6.0
-numpy==1.24.4
+numpy==1.26
 oauthlib==3.2.2
 packaging==24.2
 pandas==2.0.3
