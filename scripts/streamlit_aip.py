@@ -108,7 +108,7 @@ similar_counties = df_pool.iloc[indices]
 similar_counties = similar_counties[similar_counties['State'] != state_input]
 
 # Percentile filter for small counties
-if population_value <= 700_000:
+if population_value <= 1_000_000:
     selected_percentile = selected_row['population_percentile'].values[0]
     percentile_min = selected_percentile - 3
     percentile_max = selected_percentile + 3
