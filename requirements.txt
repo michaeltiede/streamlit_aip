@@ -1,3 +1,5 @@
+setuptools>=68.0.0
+wheel
 appnope==0.1.4
 asttokens==2.4.1
 attrs==24.2.0
