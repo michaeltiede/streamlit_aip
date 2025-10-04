@@ -61,7 +61,7 @@ scaler = StandardScaler()
 df_scaled = scaler.fit_transform(df[features])
 
 # Save the scaler to a file for future use in the Dash app
-with open('scaler.pkl', 'wb') as f:
+with open('../pkl/scaler.pkl', 'wb') as f:
     pickle.dump(scaler, f)
 
 # Define custom weights for features
