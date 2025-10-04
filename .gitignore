@@ -1,0 +1,24 @@
+
+# Ignore sensitive files
+service_account.json
+google_sheets_oath.json
+
+# Ignore Python cache files
+__pycache__/
+*.py[cod]
+
+# Ignore virtual environment folders
+venv/
+myenv2/
+
+# Ignore environment variables files
+.env
+
+# Ignore Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+
+# Ignore macOS system files
+.DS_Store
+
+service_account.json
+google_sheets_oauth.json
