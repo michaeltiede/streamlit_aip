@@ -14,3 +14,10 @@ gspread>=6.1
 gspread-dataframe>=4.0
 Flask>=3.0
 gunicorn>=23.0
+pandas
+numpy
+scipy
+scikit-learn
+plotly
+altair
+streamlit
