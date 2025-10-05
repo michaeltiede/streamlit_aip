@@ -200,9 +200,6 @@ import re
 national_min = df[variable_input].min()
 national_max = df[variable_input].max()
 
-# Define national color scale
-color_scale = alt.Scale(scheme='redblue', domain=[national_min, national_max])
-
 # -------------------------------
 # Prepare data for bar chart
 # -------------------------------

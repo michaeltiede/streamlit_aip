@@ -110,13 +110,13 @@ def get_pool_and_scaled(selected_population, df, scaler, features, racial_featur
     
     # Default: use full dataset
     df_pool = df.copy()
-    df_scaled = scaler.transform(df_pool[features])
+    df_pool_scaled = scaler.transform(df_pool[features])
 
     for pop_thresh, pool_min,pool_max, pop_weight_factor, race_weight_factor in thresholds:
         if selected_population > pop_thresh:
             # Restrict pool to other large counties
             df_pool = df[(df['Population'] > pool_min) & (df['Population'] < pool_max)].copy()
-            df_scaled = scaler.transform(df_pool[features])
+            df_pool_scaled = scaler.transform(df_pool[features])
             
             # Adjust weights
             pop_index = features.index('Population')
@@ -128,7 +128,7 @@ def get_pool_and_scaled(selected_population, df, scaler, features, racial_featur
             
             break  # Stop after the first matching threshold
 
-    return df_pool, df_scaled, weights
+    return df_pool, df_pool_scaled, weights
 
 
 # -------------------------------
