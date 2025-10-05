@@ -60,10 +60,6 @@ if 'population_percentile' not in df.columns:
 scaler = StandardScaler()
 df_scaled = scaler.fit_transform(df[features])
 
-# Save the scaler to a file for future use in the Dash app
-with open('../pkl/scaler.pkl', 'wb') as f:
-    pickle.dump(scaler, f)
-
 # Define custom weights for features
 race_weights ={'% Black': 50, '% American Indian or Alaska Native': 50, '% Asian': 50,
                    '% Native Hawaiian or Other Pacific Islander': 50, '% Hispanic': 50, '% Non-Hispanic White': 10}
@@ -139,11 +135,17 @@ sorted_counties = sorted(df[['County', 'State']].sort_values(by='County')['Count
 
 df['More Info'] = ''
 
-# Save weights to pkl folder
+# Save weights and scaler to pkl folder
+pkl_dir = os.path.join(BASE_DIR, '../pkl')
+os.makedirs(pkl_dir, exist_ok=True)  # create folder if missing
 
-weights_path = os.path.join(BASE_DIR, '../pkl/weights.pkl')
-with open(weights_path, 'wb') as f:
-    pickle.dump(all_weights, f)
+# Only save if running locally (not on Streamlit server)
+if os.environ.get("STREAMLIT_SERVER", "") == "":
+    with open(os.path.join(pkl_dir, 'scaler.pkl'), 'wb') as f:
+        pickle.dump(scaler, f)
+    with open(os.path.join(pkl_dir, 'weights.pkl'), 'wb') as f:
+        pickle.dump(all_weights, f)
+
 
 # Save preprocessed CSV to data folder
 csv_path = os.path.join(BASE_DIR, '../data/preprocessed_data.csv')
