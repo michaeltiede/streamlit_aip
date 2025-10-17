@@ -24,7 +24,8 @@ df = df.rename(columns={
 # List of columns to clean and convert
 columns_to_clean = ['Income', 'Upward mobility', 'Life Expectancy']
 industries_list = df.columns[16:36].tolist()
-industries_top2_list = df.columns[36:38].tolist()
+industries_top2_list = ['Primary Industry', 'Secondary Industry']
+
 
 # Replace non-numeric characters and convert to float
 
