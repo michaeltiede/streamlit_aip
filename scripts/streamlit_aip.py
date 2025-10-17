@@ -70,13 +70,7 @@ variable_input = st.sidebar.selectbox(
     index=0
 )
 
-#rename columns
-df = df.rename(columns={
-    'Top 1 Industry String': 'Primary Industry',
-    'Top 2 Industry String': 'Secondary Industry'
-})
 
-print(df.columns)
 # -------------------------------
 # Main Display
 # -------------------------------
@@ -125,7 +119,7 @@ top_10_counties = ranked_counties.head(10)
 # Add clickable county links
 original_fips = selected_row['FIPS'].values[0]
 top_10_counties = top_10_counties.copy()
-top_10_counties['County'] = top_10_counties.apply(
+top_10_counties['County_name'] = top_10_counties.apply(
     lambda row: f'<a href="{make_compare_link(original_fips, row["FIPS"])}" target="_blank">{row["County"]}</a>',
     axis=1
 )
@@ -145,7 +139,7 @@ st.sidebar.header("Mirror Counties")
 
 # Prepare dropdown options: plain text (no HTML)
 top_10_options = top_10_counties.copy()
-top_10_options['display'] = top_10_options['State'] + " – " + top_10_options['County'].str.replace(r'<.*?>', '', regex=True)
+top_10_options['display'] = top_10_options['State'] + " – " + top_10_options['County']
 
 # Dropdown selection
 selected_county_for_info = st.sidebar.selectbox(
@@ -177,7 +171,7 @@ st.subheader(f"Mirror Counties for {county_input}, {state_input}")
 
 # Display top 10 counties without HTML in the dataframe
 top_10_display = top_10_counties.copy()
-top_10_display['County'] = top_10_display['County'].str.replace(r'<.*?>', '', regex=True)
+# top_10_display['County'] = top_10_display['County'].str.replace(r'<.*?>', '', regex=True)
 st.dataframe(top_10_display[display_columns].reset_index(drop=True))
 
 import pydeck as pdk
@@ -209,7 +203,7 @@ plot_df = pd.concat([selected_row, top_10_counties], ignore_index=True)
 plot_df = plot_df.drop_duplicates(subset="FIPS")
 
 # Remove HTML tags for County names
-plot_df['County_name'] = plot_df['County'].str.replace(r'<.*?>', '', regex=True)
+# plot_df['County_name'] = plot_df['County'].str.replace(r'<.*?>', '', regex=True)
 
 # Keep selected county first
 selected_fips = selected_row["FIPS"].values[0]
@@ -244,10 +238,10 @@ else:
 # Bar chart
 # -------------------------------
 bar_chart = alt.Chart(plot_df).mark_bar().encode(
-    x=alt.X("County_name", sort=plot_df["County_name"].tolist(), axis=alt.Axis(title="County")),
+    x=alt.X("County", sort=plot_df["County"].tolist(), axis=alt.Axis(title="County")),
     y=y_axis,
     color=alt.Color(variable_input, scale=color_scale),
-    tooltip=["County_name", variable_input]
+    tooltip=["County", variable_input]
 ).properties(width=600)
 
 # -------------------------------
@@ -283,54 +277,80 @@ for feat in valid_features:
     fips = feat['id']
     original_name = feat['properties'].get('County') or feat['properties'].get('NAME') or 'Unknown'
     plain_name = re.sub(r'<.*?>', '', original_name)
-    feat['properties']['County_name'] = plain_name
+    feat['properties']['County'] = plain_name
     feat['properties'][variable_input] = fips_to_variable.get(fips, 0)
     feat['properties']['County'] = fips_to_county.get(fips, plain_name)
 
 top10_fips_set = set(top_10_counties['FIPS_str'])
 
 # -------------------------------
-# Altair Choropleth Map
+# PyDeck Map (Black background, Red Dots)
 # -------------------------------
 
-# Base layer: all counties gray
-base = alt.Chart(alt.Data(values=valid_features)).mark_geoshape(
-    fill='lightgray'
-).encode(
-    tooltip=[alt.Tooltip('properties.County_name:N', title='County')]
-).project('albersUsa')
+import pydeck as pdk
 
-# Top 10 layer: colored by national scale
-top10_layer = alt.Chart(
-    alt.Data(values=[feat for feat in valid_features if feat['id'] in top10_fips_set])
-).mark_geoshape(
-    stroke='black',       # black outline
-    strokeWidth=0.5
-).encode(
-    color=alt.Color(f'properties.{variable_input}:Q', scale=color_scale, title=variable_input),
-    tooltip=[
-        alt.Tooltip('properties.County_name:N', title='County'),
-        alt.Tooltip(f'properties.{variable_input}:Q', title=variable_input)
-    ]
-).project('albersUsa')
+# Step 1: Create a plain-text version of County names
+# top_10_counties['County_name'] = top_10_counties['County'].str.replace(r'<.*?>', '', regex=True)
+
+# Step 2: Prepare map data using the new column
+map_data = top_10_counties[['County', 'State', 'Latitude', 'Longitude']].copy()
+map_data['color'] = [[255, 0, 0]] * len(map_data)  # red dots
+map_data['size'] = 50000
+
+# Step 3: Prepare selected county data
+selected_data = df[df['FIPS'] == selected_fips].copy()
+# selected_data['County_name'] = selected_data['County'].str.replace(r'<.*?>', '', regex=True)
+selected_data = selected_data[['County', 'State', 'Latitude', 'Longitude']]
+selected_data['color'] = [[255, 215, 0]] * len(selected_data)  # Gold dot
+selected_data['size'] = 50000
+
+# Step 4: Combine
+map_df = pd.concat([map_data, selected_data], ignore_index=True)
 
 
-# Selected county outline
-selected_layer = alt.Chart(
-    alt.Data(values=[feat for feat in valid_features if feat['id'] == selected_fips_str])
-).mark_geoshape(
-    fillOpacity=0,
-    stroke='black',
-    strokeWidth=2
-).encode(
-    tooltip=[alt.Tooltip('properties.County_name:N', title='County')]
-).project('albersUsa')
+# Define the layer for red points
+layer = pdk.Layer(
+    "ScatterplotLayer",
+    data=map_df,
+    get_position='[Longitude, Latitude]',
+    get_color='color',
+    get_radius="size",
+    pickable=True
+)
 
-# Combine layers
-choropleth_chart = alt.layer(base, top10_layer, selected_layer).properties(
-    width=700,
-    height=500,
-    title=f"Top 10 Counties and Selected County for {variable_input}"
+
+# Default US center
+us_lat, us_lon = 37.0902, -95.7129
+default_zoom = 3
+
+# Check if Alaska or Hawaii are in the dataset
+includes_ak_hi = map_df['State'].isin(['Alaska', 'Hawaii']).any()
+
+if includes_ak_hi:
+    # Expand the zoom to show Alaska/Hawaii; adjust latitude and longitude slightly
+    # This centers roughly near the midpoint of Alaska, Hawaii, and contiguous US
+    initial_lat = 48   # midpoint for visual fit
+    initial_lon = -110
+    initial_zoom = 2   # zoomed out to include all
+else:
+    initial_lat = us_lat
+    initial_lon = us_lon
+    initial_zoom = default_zoom
+
+initial_view = pdk.ViewState(
+    latitude=initial_lat,
+    longitude=initial_lon,
+    zoom=initial_zoom,
+    pitch=0
+)
+
+
+# Define the dark background map style
+deck = pdk.Deck(
+    map_style='mapbox://styles/mapbox/dark-v11',
+    layers=[layer],
+    initial_view_state=initial_view,
+    tooltip={"text": "{County}, {State}"}
 )
 
 # -------------------------------
@@ -338,23 +358,19 @@ choropleth_chart = alt.layer(base, top10_layer, selected_layer).properties(
 # -------------------------------
 col1, col2 = st.columns(2)
 
-#add $ for Income in Note
+# add $ for Income in Note
 if variable_input == "Income":
     avg_text = f"${national_avg:,.1f}"
 else:
     avg_text = f"{national_avg:,.1f}"
 
-
 with col1:
     st.subheader(f"{variable_input} compared to Mirror Counties")
-    # Use the updated bar chart with national average line
     st.altair_chart(bar_chart_with_avg, use_container_width=True)
     st.markdown(
-    f"*The dashed black line represents the national average for {variable_input}:  {avg_text}.*"
-)
-
-
+        f"*The dashed black line represents the national average for {variable_input}: {avg_text}.*"
+    )
 
 with col2:
-    st.subheader(f"{variable_input} Across Mirror Counties")
-    st.altair_chart(choropleth_chart, use_container_width=True)
+    st.subheader("Mirror Counties")
+    st.pydeck_chart(deck)

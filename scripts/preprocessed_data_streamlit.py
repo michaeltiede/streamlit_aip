@@ -15,6 +15,12 @@ df = data
 df.columns = df.columns.str.strip()
 
 
+#rename columns
+df = df.rename(columns={
+    'Top 1 Industry String': 'Primary Industry',
+    'Top 2 Industry String': 'Secondary Industry'
+})
+
 # List of columns to clean and convert
 columns_to_clean = ['Income', 'Upward mobility', 'Life Expectancy']
 industries_list = df.columns[16:36].tolist()
