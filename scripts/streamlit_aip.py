@@ -37,6 +37,7 @@ with open(weights_path, 'rb') as f:
 with open(geojson_path, 'r') as f:
     counties = json.load(f)
 
+
 # -------------------------------
 # Streamlit App
 # -------------------------------
@@ -344,12 +345,13 @@ initial_view = pdk.ViewState(
     pitch=0
 )
 
-
-# Define the dark background map style
+# -------------------------------
+# Deck with both layers
+# -------------------------------
 deck = pdk.Deck(
-    map_style='mapbox://styles/mapbox/dark-v11',
     layers=[layer],
     initial_view_state=initial_view,
+    map_style='dark',                 # built-in black background
     tooltip={"text": "{County}, {State}"}
 )
 
