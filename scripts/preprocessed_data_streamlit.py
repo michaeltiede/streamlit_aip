@@ -108,6 +108,9 @@ def get_pool_and_scaled(
     df_pool_scaled = scaler.transform(df_pool[features])
     
     # Original threshold logic for large counties
+    '''
+    Thresholds (Population boundary, Population Min, Population Max,Population weighting, race weighting)
+    '''
     thresholds = [
         (1_800_000, 1_500_000, 10_000_000, 0.1, 1.8),
         (1_500_000, 1_000_000, 3_500_000, 0.1, 1.6),
