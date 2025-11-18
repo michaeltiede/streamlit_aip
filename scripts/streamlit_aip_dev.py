@@ -10,7 +10,7 @@ import pydeck as pdk
 import altair as alt
 
 # Import preprocessed objects and original function
-from preprocessed_data_streamlit import df,features,sorted_states,sorted_counties,racial_features,industries_list,get_pool_and_scaled,combine_racial
+from preprocessed_data_streamlit_dev import df,features,sorted_states,sorted_counties,racial_features,industries_list,get_pool_and_scaled,combine_racial
 
 
 # -------------------------------
