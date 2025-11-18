@@ -61,7 +61,12 @@ st.markdown(
 st.sidebar.header("Compare Options")
 
 # k slider
-k = st.sidebar.slider("Number of similar counties (k)", 1, 500, 200)
+# k = st.sidebar.slider("Number of similar counties (k)", 1, 500, 200)
+
+
+st.sidebar.header("Choose State & County")
+state_input = st.sidebar.selectbox("Select a State", sorted_states, index=sorted_states.index("Alabama"))
+county_input = st.sidebar.selectbox("Select a County", df[df['State'] == state_input]['County'].unique())
 
 # Toggle: use custom settings OR use original logic
 use_custom_settings = st.sidebar.checkbox(
@@ -71,29 +76,26 @@ use_custom_settings = st.sidebar.checkbox(
 
 # If custom: show sliders
 if use_custom_settings:
-    st.sidebar.subheader("Custom Population Range (override)")
-    min_pop_slider = st.sidebar.number_input("Min population for pool", min_value=0, max_value=int(df['Population'].max()), value=0, step=50_000)
-    max_pop_slider = st.sidebar.number_input("Max population for pool", min_value=0, max_value=int(df['Population'].max()), value=9_000_000, step=50_000)
+    st.sidebar.subheader("Mirror Population Size")
+    k = st.sidebar.slider("Number of similar counties (k)", 1, 500, 200)
+    st.sidebar.subheader("Custom Weights")
+    race_weight_multiplier = st.sidebar.slider("Race Multiplier", 0.0, 10.0, 1.0)
+    industry_weight_multiplier = st.sidebar.slider("Industry Multiplier", 0.0, 10.0, 1.0)
+    st.sidebar.subheader("Population Filters")
+    min_pop_slider = st.sidebar.number_input("Minimum Population", min_value=0, max_value=int(df['Population'].max()), value=0, step=50_000)
+    max_pop_slider = st.sidebar.number_input("Maximum Population", min_value=0, max_value=int(df['Population'].max()), value=9_000_000, step=50_000)
 
-    st.sidebar.subheader("Custom Weight Multipliers")
-    race_weight_multiplier = st.sidebar.slider("Racial weight multiplier", 0.0, 10.0, 1.0)
-    industry_weight_multiplier = st.sidebar.slider("Industry weight multiplier", 0.0, 10.0, 1.0)
+    
 else:
     # placeholders used only when custom settings are off
+    k = 200
     min_pop_slider = None
     max_pop_slider = None
     race_weight_multiplier = None
     industry_weight_multiplier = None
+    population_weight_multiplier = None
 
-st.sidebar.header("Choose State & County")
-state_input = st.sidebar.selectbox("Select a State", sorted_states, index=sorted_states.index("Alabama"))
-county_input = st.sidebar.selectbox("Select a County", df[df['State'] == state_input]['County'].unique())
 
-variable_input = st.sidebar.selectbox(
-    "Select a variable to compare",
-    ["Income", "Life Expectancy", "Upward mobility"],
-    index=0
-)
 
 # -------------------------------
 # Main Display: selected county
@@ -146,7 +148,6 @@ else:
             weights[i] = weights[i] * float(race_weight_multiplier)
         elif col in industries_list:
             weights[i] = weights[i] * float(industry_weight_multiplier)
-        # else: leave other feature weights (Population, % Rural) unchanged
 
 # -------------------------------
 # Compute distances and k nearest neighbors
@@ -164,27 +165,48 @@ try:
 except Exception as e:
     st.error(f"Error computing distances: {e}")
     st.stop()
+# ---------------------------------------
+# Compute K nearest neighbors from pool
+# ---------------------------------------
 
-# Get k nearest neighbors (handle case when k > pool size)
-k_use = min(int(k), len(distances))
-indices = np.argsort(distances)[:k_use]
-similar_counties = df_pool.iloc[indices].copy()
-similar_counties = similar_counties[similar_counties['State'] != state_input]
+# Sort all counties by distance first
+sorted_idx = np.argsort(distances)
 
-# Percentile filter for small counties (keep your original small-county logic)
+# Pull K nearest (before any filters)
+k_use = min(int(k), len(sorted_idx))
+nearest_idx = sorted_idx[:k_use]
+
+# Extract those counties + attach distance
+similar = df_pool.iloc[nearest_idx].copy()
+similar["distance"] = distances[nearest_idx]
+
+# Remove the selected county (if present)
+similar = similar[similar.index != index]
+
+# --------------------------------------------------------------------
+# INCOME FILTER
+# Require a match to have income >= selected county income
+# --------------------------------------------------------------------
+selected_income = float(selected_row.iloc[0]["Income"])
+similar = similar[similar["Income"] >= selected_income]
+
+# --------------------------------------------------------------------
+# POPULATION PERCENTILE FILTER (only for small counties ≤ 1M)
+# --------------------------------------------------------------------
 if population_value <= 1_000_000:
-    selected_percentile = selected_row['population_percentile'].values[0]
-    percentile_min = selected_percentile - 3
-    percentile_max = selected_percentile + 3
-    similar_counties = similar_counties[
-        (similar_counties['population_percentile'] >= percentile_min) &
-        (similar_counties['population_percentile'] <= percentile_max)
+    sel_pct = selected_row.iloc[0]["population_percentile"]
+    similar = similar[
+        similar["population_percentile"].between(sel_pct - 3, sel_pct + 3)
     ]
 
-# Rank by chosen variable
-ranked_counties = similar_counties.sort_values(by=variable_input, ascending=False)
-ranked_counties = ranked_counties[ranked_counties.index != index]
+# --------------------------------------------------------------------
+# FINAL RANKING — always sort by distance after all filters
+# --------------------------------------------------------------------
+ranked_counties = similar.sort_values("distance", ascending=True)
+
+# Top 10 matches
 top_10_counties = ranked_counties.head(10)
+
 
 # Add clickable county links for More Info button
 original_fips = selected_row['FIPS'].values[0]
@@ -201,12 +223,20 @@ display_columns = ['State', 'County', 'Population', 'Income', 'Primary Industry'
 # Sidebar Mirror Counties dropdown + button
 # -------------------------------
 st.sidebar.header("Mirror Counties")
+
+variable_input = st.sidebar.selectbox(
+    "Select a variable to compare",
+    ["Income", "Life Expectancy", "Upward mobility"],
+    index=0
+)
+
 top_10_options = top_10_counties.copy()
-top_10_options['display'] = top_10_options['State'] + " – " + top_10_options['County']
+# top_10_options['display'] = top_10_options['State'] + " – " + top_10_options['County']
+ranked_counties['display'] = ranked_counties['State'] + " – " + ranked_counties['County']
 
 selected_county_for_info = st.sidebar.selectbox(
     "Select a county for more info",
-    top_10_options['display'].tolist() if not top_10_options.empty else []
+    ranked_counties['display'].tolist() if not ranked_counties.empty else []
 )
 
 if st.sidebar.button("More Info Here!"):
@@ -221,12 +251,17 @@ if st.sidebar.button("More Info Here!"):
 # -------------------------------
 # Display DataFrames
 # -------------------------------
+# Number of rows to display
+num_rows = len(ranked_counties)
+display_height = min(num_rows + 1, 11) * 35  # ~35px per row including header
+
 st.subheader(f"Selected County: {county_input}, {state_input}")
 st.dataframe(selected_row[display_columns].reset_index(drop=True))
 
 st.subheader(f"Top 10 Similar Counties to {county_input}, {state_input}")
 top_10_display = top_10_counties.copy()
-st.dataframe(top_10_display[display_columns].reset_index(drop=True))
+st.dataframe(ranked_counties[display_columns].reset_index(drop=True), height=display_height)
+
 
 # -------------------------------
 # Charts: Bar + Map

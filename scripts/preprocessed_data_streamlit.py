@@ -76,13 +76,13 @@ df_scaled = scaler.fit_transform(df[features])
 race_weights = {race: 50 for race in racial_features}
 race_weights['White'] = 10
 
-non_race_weights = {'Population': 1, '% Rural': 50}
+non_race_weights = {'Population': 5, '% Rural': 50}
 industry_weights = {col: 50 for col in industries_list}
 
 # Double weight if racial category > 20%
 for col in racial_features:
     if df[col].mean() >= 20:
-        race_weights[col] *= 2
+        race_weights[col] *= 5
 
 all_weights = np.array([
     race_weights.get(col, non_race_weights.get(col, industry_weights.get(col, 1)))
@@ -110,8 +110,8 @@ def get_pool_and_scaled(
     # Original threshold logic for large counties
     thresholds = [
         (1_800_000, 1_500_000, 10_000_000, 0.1, 1.8),
-        (1_500_000, 1_200_000, 2_500_000, 0.1, 1.6),
-        (1_300_000, 1_000_000, 1_600_000, 0.2, 1.4),
+        (1_500_000, 1_000_000, 3_500_000, 0.1, 1.6),
+        (1_300_000, 1_000_000, 1_700_000, 0.2, 1.4),
         (1_000_000, 700_000, 1_400_000, 0.3, 1.3)
     ]
     
