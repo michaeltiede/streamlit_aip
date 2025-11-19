@@ -178,10 +178,10 @@ similar = similar[similar.index != index]
 
 # --------------------------------------------------------------------
 # INCOME FILTER
-# Require a match to have income >= selected county income
+# Require a match to have income at least 10% greater than selected county
 # --------------------------------------------------------------------
 selected_income = float(selected_row.iloc[0]["Income"])
-similar = similar[similar["Income"] >= selected_income]
+similar = similar[similar["Income"] >= selected_income * 1.10]
 
 # --------------------------------------------------------------------
 # POPULATION PERCENTILE FILTER (only for small counties ≤ 1M)
