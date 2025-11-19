@@ -236,9 +236,9 @@ selected_county_for_info = st.sidebar.selectbox(
 )
 
 if st.sidebar.button("More Info Here!"):
-    if not top_10_options.empty:
-        fips_selected = top_10_options.loc[
-            top_10_options['display'] == selected_county_for_info, 'FIPS'
+    if not ranked_counties.empty:
+        fips_selected = ranked_counties.loc[
+            ranked_counties['display'] == selected_county_for_info, 'FIPS'
         ].values[0]
         compare_url = make_compare_link(original_fips, fips_selected)
         js = f"window.open('{compare_url}')"
