@@ -51,7 +51,7 @@ with col1:
         width=100
     )
 with col2:
-    st.title("The American Inequality Project: County Comparison Dashboard")
+    st.title("American Inequality Mirror Counties")
 
 st.markdown(
     """
@@ -258,7 +258,7 @@ display_height = min(num_rows + 1, 11) * 35  # ~35px per row including header
 st.subheader(f"Selected County: {county_input}, {state_input}")
 st.dataframe(selected_row[display_columns].reset_index(drop=True))
 
-st.subheader(f"Top 10 Similar Counties to {county_input}, {state_input}")
+st.subheader(f"Mirror Counties to {county_input}, {state_input}")
 top_10_display = top_10_counties.copy()
 st.dataframe(ranked_counties[display_columns].reset_index(drop=True), height=display_height)
 
@@ -359,7 +359,7 @@ deck = pdk.Deck(layers=[layer], initial_view_state=initial_view, map_style='dark
 # -------------------------------
 col1, col2 = st.columns(2)
 with col1:
-    st.subheader(f"{variable_input} compared to Mirror Counties")
+    st.subheader(f"{variable_input} Compared to Mirror Counties")
     st.altair_chart(bar_chart_with_avg, use_container_width=True)
     if variable_input == "Income":
         avg_text = f"${national_avg:,.1f}"
