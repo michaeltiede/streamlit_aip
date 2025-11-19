@@ -20,6 +20,7 @@ BASE_DIR = os.path.dirname(__file__)
 scaler_path = os.path.join(BASE_DIR, '../../pkl/scaler.pkl')
 weights_path = os.path.join(BASE_DIR, '../../pkl/weights.pkl')
 geojson_path = os.path.join(BASE_DIR, '../../data/geojson-counties-fips.json')
+logo_path = os.path.join(BASE_DIR, '..', 'AIP_logo.png')  # adjust path if needed
 
 with open(scaler_path, 'rb') as f:
     scaler = pickle.load(f)
@@ -45,7 +46,10 @@ st.set_page_config(page_title="American Inequality Project", layout="wide")
 
 col1, col2 = st.columns([1, 5])
 with col1:
-    st.image("https://raw.githubusercontent.com/michaeltiede/american_inequality/main/AIP_logo.png", width=120)
+    st.image(
+        "https://static.wixstatic.com/media/8ca3ee_77a2a3c2434c449b9303de5e88a91cb2~mv2.png/v1/crop/x_302,y_430,w_646,h_869/fill/w_40,h_55,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/logo.png",
+        width=100
+    )
 with col2:
     st.title("The American Inequality Project: County Comparison Dashboard")
 
