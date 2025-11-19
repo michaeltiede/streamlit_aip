@@ -368,5 +368,5 @@ with col1:
     st.markdown(f"*The dashed black line represents the national average for {variable_input}: {avg_text}.*")
 
 with col2:
-    st.subheader("Mirror Counties")
+    st.subheader("Mirror Location")
     st.pydeck_chart(deck)
