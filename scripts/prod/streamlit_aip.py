@@ -12,7 +12,6 @@ import altair as alt
 # Import preprocessed objects and original function
 from preprocessed_data_streamlit import df,features,sorted_states,sorted_counties,racial_features,industries_list,get_pool_and_scaled,combine_racial
 
-
 # -------------------------------
 # Load scaler and base weights
 # -------------------------------
@@ -201,14 +200,10 @@ if population_value <= 1_000_000:
 # --------------------------------------------------------------------
 ranked_counties = similar.sort_values("distance", ascending=True)
 
-# Top 10 matches (currently not use due to the scrolling feature)
-top_10_counties = ranked_counties.head(10)
-
-
 # Add clickable county links for More Info button
 original_fips = selected_row['FIPS'].values[0]
-top_10_counties = top_10_counties.copy()
-top_10_counties['County_name'] = top_10_counties.apply(
+ranked_counties = ranked_counties.copy()
+ranked_counties['County_name'] = ranked_counties.apply(
     lambda row: f'<a href="{make_compare_link(original_fips, row["FIPS"])}" target="_blank">{row["County"]}</a>',
     axis=1
 )
@@ -227,17 +222,14 @@ variable_input = st.sidebar.selectbox(
     index=0
 )
 
-top_10_options = top_10_counties.copy()
-
-# top_10_options['display'] = top_10_options['State'] + " – " + top_10_options['County']
-
-#using ranked_counties instead of top_10 above
+# Prepare display name for sidebar dropdown
 ranked_counties['display'] = ranked_counties['State'] + " – " + ranked_counties['County']
 
 selected_county_for_info = st.sidebar.selectbox(
     "Select a county for more info",
     ranked_counties['display'].tolist() if not ranked_counties.empty else []
 )
+
 
 if st.sidebar.button("More Info Here!"):
     if not ranked_counties.empty:
@@ -251,23 +243,29 @@ if st.sidebar.button("More Info Here!"):
 # -------------------------------
 # Display DataFrames
 # -------------------------------
-# Number of rows to display
-num_rows = len(ranked_counties)
-display_height = min(num_rows + 1, 11) * 35  # ~35px per row including header
+header_height = 35
+row_height = 35     # px per row including header
+visible_rows = 10     # rows visible initially
+max_scroll_rows = 15  # max rows to scroll
 
 st.subheader(f"Selected County: {county_input}, {state_input}")
 st.dataframe(selected_row[display_columns].reset_index(drop=True))
 
 st.subheader(f"Mirror Counties to {county_input}, {state_input}")
-top_10_display = top_10_counties.copy()
-st.dataframe(ranked_counties[display_columns].reset_index(drop=True), height=display_height)
 
+display_df = ranked_counties[display_columns].head(max_scroll_rows).reset_index(drop=True)
+n_rows = min(len(display_df), max_scroll_rows)
+
+# Set height: cap at visible_rows for initial height
+display_height = min(n_rows, visible_rows) * row_height + header_height
+
+st.dataframe(display_df, height=display_height)
 
 # -------------------------------
 # Charts: Bar + Map
 # -------------------------------
 # Prepare plotting dataframe: include selected + top 10
-plot_df = pd.concat([selected_row, top_10_counties], ignore_index=True).drop_duplicates(subset="FIPS")
+plot_df = pd.concat([selected_row, ranked_counties.head(max_scroll_rows)], ignore_index=True).drop_duplicates(subset="FIPS")
 
 selected_fips = selected_row["FIPS"].values[0]
 plot_df["order"] = 0
@@ -298,15 +296,12 @@ avg_line = alt.Chart(pd.DataFrame({'y':[national_avg]})).mark_rule(color='black'
 bar_chart_with_avg = bar_chart + avg_line
 
 # Prepare GeoJSON for map
-if not top_10_counties.empty:
-    top_10_counties['FIPS_str'] = top_10_counties['FIPS'].astype(str).str.zfill(5)
-else:
-    top_10_counties['FIPS_str'] = []
+ranked_counties['FIPS_str'] = ranked_counties['FIPS'].astype(str).str.zfill(5)
 
 valid_features = [feat for feat in counties['features'] if 'geometry' in feat and feat['geometry'] is not None]
 
-fips_to_variable = dict(zip(top_10_counties['FIPS_str'], top_10_counties[variable_input])) if not top_10_counties.empty else {}
-fips_to_county = dict(zip(top_10_counties['FIPS_str'], top_10_counties['County'])) if not top_10_counties.empty else {}
+fips_to_variable = dict(zip(ranked_counties['FIPS_str'], ranked_counties[variable_input]))
+fips_to_county = dict(zip(ranked_counties['FIPS_str'], ranked_counties['County']))
 
 for feat in valid_features:
     fips = feat['id']
@@ -317,7 +312,8 @@ for feat in valid_features:
     feat['properties']['County'] = fips_to_county.get(fips, plain_name)
 
 # Map data
-map_data = top_10_counties[['County', 'State', 'Latitude', 'Longitude']].copy() if not top_10_counties.empty else pd.DataFrame(columns=['County','State','Latitude','Longitude'])
+map_data = ranked_counties.head(max_scroll_rows)[['County', 'State', 'Latitude', 'Longitude']].copy() \
+           if not ranked_counties.empty else pd.DataFrame(columns=['County','State','Latitude','Longitude'])
 map_data['color'] = [[255, 0, 0]] * len(map_data)
 map_data['size'] = 50000
 
