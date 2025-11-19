@@ -264,8 +264,9 @@ st.dataframe(display_df, height=display_height)
 # -------------------------------
 # Charts: Bar + Map
 # -------------------------------
-# Prepare plotting dataframe: include selected + top 10
+# Prepare plotting dataframe:
 plot_df = pd.concat([selected_row, ranked_counties.head(max_scroll_rows)], ignore_index=True).drop_duplicates(subset="FIPS")
+plot_df['County_display'] = plot_df['County'] +", " + plot_df['State']
 
 selected_fips = selected_row["FIPS"].values[0]
 plot_df["order"] = 0
@@ -285,10 +286,10 @@ else:
     y_axis = alt.Y(variable_input, axis=alt.Axis(title=variable_input))
 
 bar_chart = alt.Chart(plot_df).mark_bar().encode(
-    x=alt.X("County", sort=plot_df["County"].tolist(), axis=alt.Axis(title="County")),
+    x=alt.X("County_display", sort=plot_df["County_display"].tolist(), axis=alt.Axis(title="County")),
     y=y_axis,
     color=alt.Color(variable_input, scale=color_scale),
-    tooltip=["County", variable_input]
+    tooltip=["County_display", variable_input]
 ).properties(width=600)
 
 national_avg = df[variable_input].mean()
@@ -361,7 +362,7 @@ with col1:
         avg_text = f"${national_avg:,.1f}"
     else:
         avg_text = f"{national_avg:,.1f}"
-    st.markdown(f"*The dashed black line represents the national average for {variable_input}: {avg_text}.*")
+    st.markdown(f"*Dashed line represents the national average for {variable_input}: {avg_text}.*")
 
 with col2:
     st.subheader("Mirror Location")
