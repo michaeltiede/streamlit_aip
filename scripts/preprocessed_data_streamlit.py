@@ -79,7 +79,7 @@ race_weights['White'] = 10
 non_race_weights = {'Population': 5, '% Rural': 50}
 industry_weights = {col: 50 for col in industries_list}
 
-# Double weight if racial category > 20%
+# Increase weight if racial category > 20%
 for col in racial_features:
     if df[col].mean() >= 20:
         race_weights[col] *= 5

@@ -60,10 +60,6 @@ st.markdown(
 # Sidebar controls
 st.sidebar.header("Compare Options")
 
-# k slider
-# k = st.sidebar.slider("Number of similar counties (k)", 1, 500, 200)
-
-
 st.sidebar.header("Choose State & County")
 state_input = st.sidebar.selectbox("Select a State", sorted_states, index=sorted_states.index("Alabama"))
 county_input = st.sidebar.selectbox("Select a County", df[df['State'] == state_input]['County'].unique())
@@ -85,7 +81,6 @@ if use_custom_settings:
     min_pop_slider = st.sidebar.number_input("Minimum Population", min_value=0, max_value=int(df['Population'].max()), value=0, step=50_000)
     max_pop_slider = st.sidebar.number_input("Maximum Population", min_value=0, max_value=int(df['Population'].max()), value=9_000_000, step=50_000)
 
-    
 else:
     # placeholders used only when custom settings are off
     k = 200
@@ -94,8 +89,6 @@ else:
     race_weight_multiplier = None
     industry_weight_multiplier = None
     population_weight_multiplier = None
-
-
 
 # -------------------------------
 # Main Display: selected county
@@ -204,7 +197,7 @@ if population_value <= 1_000_000:
 # --------------------------------------------------------------------
 ranked_counties = similar.sort_values("distance", ascending=True)
 
-# Top 10 matches
+# Top 10 matches (currently not use due to the scrolling feature)
 top_10_counties = ranked_counties.head(10)
 
 
@@ -231,7 +224,10 @@ variable_input = st.sidebar.selectbox(
 )
 
 top_10_options = top_10_counties.copy()
+
 # top_10_options['display'] = top_10_options['State'] + " – " + top_10_options['County']
+
+#using ranked_counties instead of top_10 above
 ranked_counties['display'] = ranked_counties['State'] + " – " + ranked_counties['County']
 
 selected_county_for_info = st.sidebar.selectbox(
