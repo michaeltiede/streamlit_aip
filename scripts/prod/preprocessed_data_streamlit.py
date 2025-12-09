@@ -25,7 +25,7 @@ df = df.rename(columns={
     '% American Indian or Alaska Native': 'AI/AN',
     '% Asian': 'Asian',
     '% Native Hawaiian or Other Pacific Islander': 'NH/PI',
-    '% Hispanic': 'Hispanic',
+    '% Hispanic': 'Hisp',
     '% Non-Hispanic White': 'White'
 })
 
@@ -56,7 +56,7 @@ df['population_percentile'] = df['Population'].apply(lambda x: percentileofscore
 # -------------------------------
 # Feature lists
 # -------------------------------
-racial_features = ['Black', 'AI/AN', 'Asian', 'NH/PI', 'Hispanic', 'White']
+racial_features = ['White','Black','Hisp','Asian', 'AI/AN',  'NH/PI']
 
 other_features = ['Population', '% Rural']
 features = racial_features + other_features + industries_list
@@ -112,10 +112,10 @@ def get_pool_and_scaled(
     Thresholds (Population boundary, Population Min, Population Max,Population weighting, race weighting)
     '''
     thresholds = [
-        (1_800_000, 1_500_000, 10_000_000, 0.1, 1.8),
-        (1_500_000, 1_000_000, 3_500_000, 0.1, 1.6),
-        (1_300_000, 1_000_000, 1_700_000, 0.2, 1.4),
-        (1_000_000, 700_000, 1_400_000, 0.3, 1.3)
+        (1_900_000, 1_500_000, 10_000_000, 0.1, 4.5),
+        (1_600_000, 1_300_000, 3_500_000, 0.1, 4.3),
+        (1_300_000, 1_000_000, 1_900_000, 0.2, 4.5),
+        (1_000_000, 700_000, 1_400_000, 0.3, 2)
     ]
     
     if use_custom_limits:
@@ -161,6 +161,9 @@ def combine_racial(df, racial_columns):
 
 df = combine_racial(df, racial_features)
 
+df["Top Industries"] = (
+    df["Primary Industry"] + ", " + df["Secondary Industry"]
+)
 
 # -------------------------------
 # Sort states and counties

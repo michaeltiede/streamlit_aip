@@ -10,7 +10,7 @@ import pydeck as pdk
 import altair as alt
 
 # Import preprocessed objects and original function
-from preprocessed_data_streamlit import df,features,sorted_states,sorted_counties,racial_features,industries_list,get_pool_and_scaled,combine_racial
+from preprocessed_data_streamlit import df,features,sorted_states,racial_features,industries_list,get_pool_and_scaled
 
 # -------------------------------
 # Load scaler and base weights
@@ -209,7 +209,7 @@ ranked_counties['County_name'] = ranked_counties.apply(
 )
 
 # Columns to display
-display_columns = ['State', 'County', 'Population', 'Income', 'Primary Industry', 'Secondary Industry', 'Racial Breakdown']
+display_columns = ['State', 'County', 'Population', 'Income', 'Racial Breakdown','Top Industries']
 
 # -------------------------------
 # Sidebar Mirror Counties dropdown + button
@@ -240,33 +240,51 @@ if st.sidebar.button("More Info Here!"):
         js = f"window.open('{compare_url}')"
         st.components.v1.html(f"<script>{js}</script>", height=0)
 
-# -------------------------------
-# Display DataFrames
+## -------------------------------
+# Display DataFrames with aligned columns
 # -------------------------------
 header_height = 35
-row_height = 35     # px per row including header
-visible_rows = 10     # rows visible initially
-max_scroll_rows = 15  # max rows to scroll
+row_height = 35
+visible_rows = 10
+max_scroll_rows = 15
 
+# Prepare copies for display with formatting
+selected_row_display = selected_row[display_columns].copy().reset_index(drop=True)
+ranked_display_df = ranked_counties[display_columns].head(max_scroll_rows).copy().reset_index(drop=True)
+
+# Format Population with commas
+for pop in [selected_row_display, ranked_display_df]:
+    pop['Population'] = pop['Population'].map('{:,}'.format)
+# Format Income for display
+for df_format in [selected_row_display, ranked_display_df]:
+    df_format["Income"] = df_format["Income"].apply(lambda x: f"${x:,.0f}")
+
+    
+
+# Optional: Use st.dataframe with fixed column widths
+def display_aligned_df(df, height=None):
+    st.dataframe(df.style.set_table_styles([
+        {'selector': 'th', 'props': [('min-width', '120px')]},  # header min width
+        {'selector': 'td', 'props': [('min-width', '120px')]},  # cell min width
+    ]), height=height)
+
+# Display selected county
 st.subheader(f"Selected County: {county_input}, {state_input}")
-st.dataframe(selected_row[display_columns].reset_index(drop=True))
+display_aligned_df(selected_row_display, height=row_height + header_height)
 
+# Display mirror counties
 st.subheader(f"Mirror Counties to {county_input}, {state_input}")
-
-display_df = ranked_counties[display_columns].head(max_scroll_rows).reset_index(drop=True)
-n_rows = min(len(display_df), max_scroll_rows)
-
-# Set height: cap at visible_rows for initial height
+n_rows = min(len(ranked_display_df), max_scroll_rows)
 display_height = min(n_rows, visible_rows) * row_height + header_height
+display_aligned_df(ranked_display_df, height=display_height)
 
-st.dataframe(display_df, height=display_height)
 
 # -------------------------------
 # Charts: Bar + Map
 # -------------------------------
-# Prepare plotting dataframe:
+# Prepare plotting dataframe (keep numeric Income for charts)
 plot_df = pd.concat([selected_row, ranked_counties.head(max_scroll_rows)], ignore_index=True).drop_duplicates(subset="FIPS")
-plot_df['County_display'] = plot_df['County'] +", " + plot_df['State']
+plot_df['County_display'] = plot_df['County'] + ", " + plot_df['State']
 
 selected_fips = selected_row["FIPS"].values[0]
 plot_df["order"] = 0
@@ -298,9 +316,7 @@ bar_chart_with_avg = bar_chart + avg_line
 
 # Prepare GeoJSON for map
 ranked_counties['FIPS_str'] = ranked_counties['FIPS'].astype(str).str.zfill(5)
-
 valid_features = [feat for feat in counties['features'] if 'geometry' in feat and feat['geometry'] is not None]
-
 fips_to_variable = dict(zip(ranked_counties['FIPS_str'], ranked_counties[variable_input]))
 fips_to_county = dict(zip(ranked_counties['FIPS_str'], ranked_counties['County']))
 
@@ -315,12 +331,12 @@ for feat in valid_features:
 # Map data
 map_data = ranked_counties.head(max_scroll_rows)[['County', 'State', 'Latitude', 'Longitude']].copy() \
            if not ranked_counties.empty else pd.DataFrame(columns=['County','State','Latitude','Longitude'])
-map_data['color'] = [[255, 0, 0]] * len(map_data)
+map_data['color'] = [[50, 110, 200]] * len(map_data)
 map_data['size'] = 50000
 
 selected_data = df[df['FIPS'] == selected_fips].copy()
 selected_data = selected_data[['County', 'State', 'Latitude', 'Longitude']]
-selected_data['color'] = [[255, 215, 0]] * len(selected_data)
+selected_data['color'] = [[255, 0, 0]] * len(selected_data)
 selected_data['size'] = 50000
 
 map_df = pd.concat([map_data, selected_data], ignore_index=True)
@@ -348,8 +364,7 @@ else:
     initial_zoom = default_zoom
 
 initial_view = pdk.ViewState(latitude=initial_lat, longitude=initial_lon, zoom=initial_zoom, pitch=0)
-
-deck = pdk.Deck(layers=[layer], initial_view_state=initial_view, map_style='dark', tooltip={"text": "{County}, {State}"})
+deck = pdk.Deck(layers=[layer], initial_view_state=initial_view, map_style='light', tooltip={"text": "{County}, {State}"})
 
 # -------------------------------
 # Display charts and map
@@ -358,10 +373,7 @@ col1, col2 = st.columns(2)
 with col1:
     st.subheader(f"{variable_input} Compared to Mirror Counties")
     st.altair_chart(bar_chart_with_avg, use_container_width=True)
-    if variable_input == "Income":
-        avg_text = f"${national_avg:,.1f}"
-    else:
-        avg_text = f"{national_avg:,.1f}"
+    avg_text = f"${national_avg:,.0f}" if variable_input == "Income" else f"{national_avg:,.1f}"
     st.markdown(f"*Dashed line represents the national average for {variable_input}: {avg_text}.*")
 
 with col2:
