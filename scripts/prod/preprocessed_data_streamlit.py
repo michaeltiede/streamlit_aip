@@ -25,7 +25,7 @@ df = df.rename(columns={
     '% American Indian or Alaska Native': 'AI/AN',
     '% Asian': 'Asian',
     '% Native Hawaiian or Other Pacific Islander': 'NH/PI',
-    '% Hispanic': 'Hisp',
+    '% Hispanic': 'Hispanic',
     '% Non-Hispanic White': 'White'
 })
 
@@ -56,7 +56,7 @@ df['population_percentile'] = df['Population'].apply(lambda x: percentileofscore
 # -------------------------------
 # Feature lists
 # -------------------------------
-racial_features = ['White','Black','Hisp','Asian', 'AI/AN',  'NH/PI']
+racial_features = ['White','Black','Hispanic','Asian', 'AI/AN',  'NH/PI']
 
 other_features = ['Population', '% Rural']
 features = racial_features + other_features + industries_list
