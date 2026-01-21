@@ -25,7 +25,7 @@ df = df.rename(columns={
     '% American Indian or Alaska Native': 'AI/AN',
     '% Asian': 'Asian',
     '% Native Hawaiian or Other Pacific Islander': 'NH/PI',
-    '% Hispanic': 'Hispanic',
+    '% Hispanic': 'Hisp',
     '% Non-Hispanic White': 'White'
 })
 
@@ -56,7 +56,7 @@ df['population_percentile'] = df['Population'].apply(lambda x: percentileofscore
 # -------------------------------
 # Feature lists
 # -------------------------------
-racial_features = ['White','Black','Hispanic','Asian', 'AI/AN',  'NH/PI']
+racial_features = ['White','Black','Hisp','Asian', 'AI/AN',  'NH/PI']
 
 other_features = ['Population', '% Rural']
 features = racial_features + other_features + industries_list
@@ -79,6 +79,11 @@ race_weights['White'] = 10
 non_race_weights = {'Population': 5, '% Rural': 50}
 industry_weights = {col: 50 for col in industries_list}
 
+# Increase weight if racial category > 20%
+for col in racial_features:
+    if df[col].mean() >= 20:
+        race_weights[col] *= 5
+
 all_weights = np.array([
     race_weights.get(col, non_race_weights.get(col, industry_weights.get(col, 1)))
     for col in features
@@ -98,11 +103,6 @@ def get_pool_and_scaled(
     """
     weights = weights.copy()
     df_pool = df.copy()
-
-#I removed this because it was too much weighting
-    # for col in racial_features:
-    #     if df[col].mean() >= 20:
-    #         race_weights[col] *= 5
     
     # Scale initial pool
     df_pool_scaled = scaler.transform(df_pool[features])
@@ -112,9 +112,9 @@ def get_pool_and_scaled(
     Thresholds (Population boundary, Population Min, Population Max,Population weighting, race weighting)
     '''
     thresholds = [
-        (1_900_000, 1_500_000, 10_000_000, 0.1, 3),
-        (1_600_000, 1_300_000, 2_000_000, 0.1, 3),
-        (1_300_000, 1_000_000, 1_500_000, 0.2, 3),
+        (1_900_000, 1_500_000, 10_000_000, 0.1, 4.5),
+        (1_600_000, 1_300_000, 3_500_000, 0.1, 4.3),
+        (1_300_000, 1_000_000, 1_900_000, 0.2, 4.5),
         (1_000_000, 700_000, 1_400_000, 0.3, 2)
     ]
     

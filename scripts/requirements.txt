@@ -1,0 +1,23 @@
+setuptools>=68.0.0
+wheel
+streamlit>=1.30  # Updated to work with Python 3.13
+numpy>=2.0        # Compatible with Python 3.13
+pandas>=2.0
+plotly>=5.0
+dash>=2.18
+dash-mantine-components>=0.14
+streamlit-aggrid>=1.1
+geopandas>=0.12   # Updated geopandas for Python 3.13
+pyproj>=3.6       # Precompiled wheel available, avoids build issues
+fiona>=1.10
+gspread>=6.1
+gspread-dataframe>=4.0
+Flask>=3.0
+gunicorn>=23.0
+pandas
+numpy
+scipy
+scikit-learn
+plotly
+altair
+streamlit
