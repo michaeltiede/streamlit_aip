@@ -1,0 +1,56 @@
+﻿GEOID: the U.S. Census blockgroup id
+place: the city, town, village or unincorporated community the block group is mostly within
+state: the state the block group is in
+state_abbr: the state abbreviation
+county: the county the block group is in
+ua_name: the urban area the block group is located in
+ua_pop: the sum of the clipped block group population in the urban area
+congressio:  the congressional district of the block group
+cbg_pop: the total population of the clipped block group (the part of the block group within the urban area) from the 2020 Census
+acs_pop: the total population of the entire block group (includes non-urban population) from the ACS Community Survey 2017-2021 Estimates
+land_area: the land area of the blockgroup in square kilometers (omits water area)
+biome:  the biome of the blockgroup
+cnpysource: the source of the tree canopy data of the block group
+tc_goal: the tree canopy goal of the block group [range: 0-1]
+treecanopy: the tree canopy percentage of the block group [range: 0-1]
+tc_gap: the tree canopy gap of the block group (goal minus canopy) [range: 0-1]
+priority_i: the priority index of the block group [range: 0-1]
+pctpoc: the percent of people of color inside the block group [range: 0-1]
+pctpocnorm: the normalized percent people of color inside the block group [range: 0-1]
+pctpov: the percent of people in poverty inside the block group [range: 0-1]
+pctpovnorm: the normalized percent people in poverty inside the block group [range: 0-1]
+unemplrate: the unemployment rate inside of the block group [range: 0-1]
+unemplnorm: the normalized unemployment rate inside the block group [range: 0-1]
+dep_ratio: the dependency ratio (childrens + seniors / 18-64 adults)
+depratnorm: the normalized dependency ratio inside the block group [range: 0-1]
+dep_perc: the percent of the population that are children and seniors [range: 0-1]
+linguistic: the percent of households where no person age 14+ speaks only English, or no person age 14+ who speaks a language other than English speaks English "very well." inside the block group [range: 0-1]
+lingnorm: the normalized percent of linguistic isolation present in the block group [range: 0-1]
+healthnorm: the normalized health burden index of the block group [range: 0-1]
+temp_diff: the difference between the average block group heat extremity with the urban area average to measure variance in heat severity across an urban area
+temp_norm: the normalized temp_diff value of the block group [range: 0-1]
+tes: the Tree Equity Score of the block group [range: 0-100]
+tesctyscor: the composite score of the locality (ex: incorporated place, census designated place) aggregated from all block group Tree Equity Scores within the locality [range: 0-100, none if not in a locality]
+holc_grade: Home Owner's Loan Corporation grades from Mapping Inequality,  from �A,� the highest grade treated as low risk for mortgage lenders, to �D� the lowest grade deemed "hazardous."
+child_perc: the percent of children inside of the block group [range: 0-1]
+seniorperc: the percent of seniors inside of the block group [range: 0-1]
+ej_disadva: communities determined to be "disadvantaged" by the US Environmental Protection Agency under the Inflation Reduction Act
+rank: the rank of the Tree Equity Score compared to the other block groups in the municipalitity
+rankgrpsz: the number of block groups in the municipality which are ranked against one another
+_bld1200: percent shade cast by buildings at noon
+_veg1200: percent shade cast by trees and other non-building features at noon
+_bld1500: percent shade cast by buildings at 3 p.m.
+_veg1500: percent shade cast by trees and other non-building features at 3 p.m.
+_bld1800: percent shade cast by buildings at 6 p.m.
+_veg1800: percent shade cast by trees and other non-building features sat 6 p.m.
+_tot1200: total percent shade cast at noon
+_tot1500: total percent shade cast at 3 p.m.
+_tot1800: total percent shade cast at 6 p.m.
+geometry: the geometry of the block group (for geojson and shapefile)
+
+Questions about methodology or data sources? Visit https://www.treeequityscore.org/methodology/ for more details.
+
+
+
+
+
