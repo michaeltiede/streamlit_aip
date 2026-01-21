@@ -297,7 +297,7 @@ color_scale = alt.Scale(scheme='redblue', domain=[national_min, national_max])
 
 # Y-axis formatting
 if variable_input == "Life Expectancy":
-    y_axis = alt.Y(variable_input, axis=alt.Axis(title=variable_input), scale=alt.Scale(domain=[0, 100]))
+    y_axis = alt.Y(variable_input, axis=alt.Axis(title=variable_input), scale=alt.Scale(domain=[50, 100]))
 elif variable_input == "Upward mobility":
     y_axis = alt.Y(variable_input, axis=alt.Axis(title=variable_input), scale=alt.Scale(domain=[0, 80]))
 else:
