@@ -99,8 +99,7 @@ def get_pool_and_scaled(
     weights = weights.copy()
     df_pool = df.copy()
     
-    #I removed this because it was too much weighting
-    # Increase weight if racial category > 20%
+    # New conditions
     for col in racial_features:
         mean_val = df[col].mean()
         if mean_val >= 40:
