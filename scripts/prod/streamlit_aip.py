@@ -55,7 +55,6 @@ with col2:
 st.markdown(
     """
     [AmericanInequality.substack.com](https://www.americaninequality.substack.com/)  
-    <span style='font-size:10px'>Developed by Michael Tiede</span>
     """,
     unsafe_allow_html=True
 )
@@ -192,7 +191,7 @@ similar = similar[similar["Income"] >= selected_income * 1.10]
 if population_value <= 1_000_000:
     sel_pct = selected_row.iloc[0]["population_percentile"]
     similar = similar[
-        similar["population_percentile"].between(sel_pct - 3, sel_pct + 3)
+        similar["population_percentile"].between(sel_pct - 5, sel_pct + 5)
     ]
 
 # --------------------------------------------------------------------
@@ -252,21 +251,22 @@ max_scroll_rows = 15
 selected_row_display = selected_row[display_columns].copy().reset_index(drop=True)
 ranked_display_df = ranked_counties[display_columns].head(max_scroll_rows).copy().reset_index(drop=True)
 
-# Format Population with commas
-for pop in [selected_row_display, ranked_display_df]:
-    pop['Population'] = pop['Population'].map('{:,}'.format)
-# Format Income for display
-for df_format in [selected_row_display, ranked_display_df]:
-    df_format["Income"] = df_format["Income"].apply(lambda x: f"${x:,.0f}")
-
     
-
-# Optional: Use st.dataframe with fixed column widths
+#St.dataframe
 def display_aligned_df(df, height=None):
-    st.dataframe(df.style.set_table_styles([
-        {'selector': 'th', 'props': [('min-width', '120px')]},  # header min width
-        {'selector': 'td', 'props': [('min-width', '120px')]},  # cell min width
-    ]), height=height)
+    styled_df = (
+        df.style
+        .set_table_styles([
+            {'selector': 'th', 'props': [('min-width', '120px')]},
+            {'selector': 'td', 'props': [('min-width', '120px')]},
+        ])
+        .format({
+            "Population": "{:,}",
+            "Income": "${:,.0f}"
+        })
+    )
+
+    st.dataframe(styled_df, height=height)
 
 # Display selected county
 st.subheader(f"Selected County: {county_input}, {state_input}")
@@ -379,3 +379,10 @@ with col1:
 with col2:
     st.subheader("Mirror Location")
     st.pydeck_chart(deck)
+
+st.markdown(
+    """
+    Developed by [Michael Tiede](https://substack.com/@michaeltiede/posts)  
+    """,
+    unsafe_allow_html=True
+)
