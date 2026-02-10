@@ -21,3 +21,5 @@ scikit-learn
 plotly
 altair
 streamlit
+openai>=1.28.0
+time
