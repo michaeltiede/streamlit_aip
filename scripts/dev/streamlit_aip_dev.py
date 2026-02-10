@@ -9,8 +9,10 @@ import re
 import pydeck as pdk
 import altair as alt
 
+# "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"
+
 # Import preprocessed objects and original function
-from preprocessed_data_streamlit import df,features,sorted_states,racial_features,industries_list,get_pool_and_scaled
+from preprocessed_data_streamlit_dev import df,features,sorted_states,racial_features,industries_list,get_pool_and_scaled
 
 # -------------------------------
 # Load scaler and base weights
@@ -42,6 +44,13 @@ def make_compare_link(original_fips, compare_fips):
 # Streamlit Layout / Sidebar
 # -------------------------------
 st.set_page_config(page_title="American Inequality Project", layout="wide")
+
+###Page Navigation###
+page = st.sidebar.radio(
+    "Page",
+    ["Mirror Counties", "Culture Analysis"]
+)
+########################
 
 col1, col2 = st.columns([1, 5])
 with col1:
@@ -95,7 +104,9 @@ else:
 # -------------------------------
 # Main Display: selected county
 # -------------------------------
-selected_row = df[(df['State'] == state_input) & (df['County'] == county_input)]
+
+if page == "Mirror Counties":
+    selected_row = df[(df['State'] == state_input) & (df['County'] == county_input)]
 if selected_row.empty:
     st.error(f"No data found for {county_input}, {state_input}.")
     st.stop()

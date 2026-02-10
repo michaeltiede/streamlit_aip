@@ -9,10 +9,10 @@ import re
 import pydeck as pdk
 import altair as alt
 
-# "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"
+# "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"
 
 # Import preprocessed objects and original function
-from preprocessed_data_streamlit import df,features,sorted_states,racial_features,industries_list,get_pool_and_scaled
+from preprocessed_data_streamlit_dev import df,features,sorted_states,racial_features,industries_list,get_pool_and_scaled
 
 # -------------------------------
 # Load scaler and base weights
@@ -416,7 +416,7 @@ if page == "Culture Analysis":
 
     if run_llm:
         # Hardcoded API key
-        openai.api_key = os.getenv("OPENAI_API_KEY")
+        openai.api_key = "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"  # replace with your actual key
 
         # Summarize selected county
         sel = selected_row.iloc[0]
