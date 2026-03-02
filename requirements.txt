@@ -10,7 +10,6 @@ pydeck==0.9.1
 streamlit==1.50.0
 
 # I/O & utils
-pickle5==0.0.12  # optional, only if you hit pickle version issues
 python-dotenv==1.0.1
 requests==2.32.3
 
