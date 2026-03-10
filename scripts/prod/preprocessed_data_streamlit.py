@@ -71,8 +71,25 @@ scaler = StandardScaler()
 df_scaled = scaler.fit_transform(df[features])
 
 # -------------------------------
-# Define weights
+# Race Weighting Methodology
 # -------------------------------
+# Goal: identify counties with meaningfully similar demographic compositions,
+# with emphasis on minority population representation.
+#
+# White population is weighted lower (20 vs 50) because it is the majority
+# demographic in most US counties. High White % is near-universal and therefore
+# carries less signal for identifying demographically distinct communities.
+# Minority populations carry higher weights because their presence meaningfully
+# differentiates counties and is more predictive of shared community experience,
+# economic conditions, and policy needs.
+#
+# Dynamic adjustments in get_pool_and_scaled():
+# - Mean >= 40%: 5x boost (dominant local demographic)
+# - Mean >= 20%: 3x boost (significant local presence)
+# - Mean <= 7%: -3x (near-absent — deprioritize spurious matches)
+# - Mean <= 5%: -5x (effectively absent — strongest deprioritization)
+# Note: check <= 5 before <= 7 to ensure correct threshold application.
+
 race_weights = {race: 50 for race in racial_features}
 race_weights['White'] = 20
 
