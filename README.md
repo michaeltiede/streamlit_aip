@@ -123,7 +123,7 @@ This is useful for researchers who want to explore sensitivity to weighting choi
 
 The American Inequality Project publishes data-driven research on economic inequality, healthcare access, demographic shifts, and social disparities in the United States. Founded by Jeremy Ney, the project's work has been featured in The New York Times, NPR, TIME, and BBC, and informs college curricula at Harvard, MIT, Columbia, and Georgetown.
 
-📰 [Read on Substack](https://www.americaninequality.substack.com/)
+📰 [Read on Substack](https://americaninequality.substack.com/?utm_campaign=profile_chips)
 
 ---
 
