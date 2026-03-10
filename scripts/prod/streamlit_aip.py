@@ -55,7 +55,7 @@ with col2:
 
 st.markdown(
     """
-    [AmericanInequality.substack.com](https://www.americaninequality.substack.com/)  
+    [Substack](https://americaninequality.substack.com/?utm_campaign=profile_chips)  
     """,
     unsafe_allow_html=True
 )
