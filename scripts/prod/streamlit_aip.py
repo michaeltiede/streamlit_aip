@@ -496,6 +496,7 @@ if page == "Culture Analysis":
                 - Give specific examples for qualitative responses, drawing on historical, cultural, and economic context.
 
                 End with stating the best mirror county for collarboration and why in bullets
+
                 Limit to 400 words
                 """
         
