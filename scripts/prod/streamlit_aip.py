@@ -70,18 +70,17 @@ page = st.sidebar.radio(
 )
 
 st.sidebar.header("Choose State & County")
+
 state_input = st.sidebar.selectbox("Select a State", sorted_states, index=sorted_states.index("California"))
 sorted_counties = df[df['State'] == state_input]['County'].unique()
+
 counties_list = list(sorted_counties)
-
 default_county = "Imperial"
-
 default_index = (
     counties_list.index(default_county)
     if default_county in counties_list
     else 0
 )
-
 county_input = st.sidebar.selectbox(
     "Select a County",
     counties_list,
