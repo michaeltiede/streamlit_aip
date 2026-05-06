@@ -70,8 +70,9 @@ page = st.sidebar.radio(
 )
 
 st.sidebar.header("Choose State & County")
-state_input = st.sidebar.selectbox("Select a State", sorted_states, index=sorted_states.index("Alabama"))
-county_input = st.sidebar.selectbox("Select a County", df[df['State'] == state_input]['County'].unique())
+state_input = st.sidebar.selectbox("Select a State", sorted_states, index=sorted_states.index("California"))
+sorted_counties = df[df['State'] == state_input]['County'].unique()
+county_input = st.sidebar.selectbox("Select a County", sorted_counties, index=list(sorted_counties).index("Imperial"))
 
 # Toggle: use custom settings OR use original logic
 use_custom_settings = st.sidebar.checkbox(
