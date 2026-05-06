@@ -487,14 +487,16 @@ if page == "Culture Analysis":
                 - Clearly distinguish qualitative insights from data-driven comparisons.
                 - Prioritize cultural similarities, social dynamics, and historical context when identifying a county as a good match.
                 - You may answer detailed questions about qualitative aspects if prompted, in relation to the data provided.
+                - Share specific examples on the area, and point out specifc detailes that are relevant
 
                 Response Format:
                 - Keep answers concise, focused, and conversational.
                 - No unnecessary preamble or conclusion.
                 - Simple, readable text, do not use chat gpt italics.
+                - Give specific examples for qualitative responses, drawing on historical, cultural, and economic context.
 
                 End with stating the best mirror county for collarboration and why in bullets
-                Limit to 350 words
+                Limit to 400 words
                 """
         
         if user_question.strip():
